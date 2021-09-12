@@ -18,6 +18,19 @@ The `StatsD4KClient` provides composable components for customization of:
 The client interface also provides `Tag` parameters for use with backends such as `New Relic` and `Datadog` (as long as
 the serializers and senders are compatible)
 
+
+## Gradle
+
+```kotlin
+repositories {
+        maven(url = "https://laurencecodes.jfrog.io/artifactory/codes.laurence.statsd4k/")
+}
+
+dependencies {
+    implementation("codes.laurence.statsd4k:statsd4k:0.0.1")
+}
+```
+
 ## New Relic Example
 
 This assumes that you are using the local [New Relic statsd server](https://docs.newrelic.com/docs/integrations/host-integrations/host-integrations-list/statsd-monitoring-integration-version-2/#install).
