@@ -1,6 +1,6 @@
 # StatsD4K
 
-![Build Status](https://github.com/lgwillmore/statsd4k/actions/workflows/test.yml/badge.svg?branch=main) ![version](https://img.shields.io/github/v/tag/lgwillmore/statsd4k?include_prereleases&label=release)
+![Build Status](https://github.com/lgwillmore/statsd4k/actions/workflows/test.yml/badge.svg?branch=main) ![version](https://img.shields.io/github/v/tag/lgwillmore/statsd4k?include_prereleases&label=version)
 
 A StatsD client for kotlin. Built to be composable and allow for operation with various StatsD backends/servers.
 
