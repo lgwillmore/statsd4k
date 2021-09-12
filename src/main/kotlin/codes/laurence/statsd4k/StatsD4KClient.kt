@@ -6,7 +6,6 @@ import codes.laurence.statsd4k.sample.Sampler
 import codes.laurence.statsd4k.send.StatsDSender
 import codes.laurence.statsd4k.serialize.StatsDSerializer
 import codes.laurence.statsd4k.serialize.StatsDSerializerBase
-import io.ktor.util.date.*
 
 typealias ExceptionHandler = (exception: Exception) -> Unit
 
@@ -36,19 +35,6 @@ class StatsD4KClient(
             tags = tags
         )
         handleMessage(message)
-    }
-
-    override suspend fun <T> timed(
-        bucket: String,
-        sampleRate: Double,
-        tags: Map<String, String?>,
-        block: suspend () -> T
-    ): T {
-        val startTime = getTimeMillis()
-        return block().also {
-            val endTime = getTimeMillis()
-            time(bucket, endTime - startTime, sampleRate, tags)
-        }
     }
 
     override suspend fun gauge(bucket: String, value: Double, tags: Map<String, String?>) {

@@ -1,7 +1,5 @@
 package codes.laurence.statsd4k
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import codes.laurence.statsd4k.message.Message
 import codes.laurence.statsd4k.sample.Sampler
 import codes.laurence.statsd4k.send.StatsDSender
@@ -11,7 +9,6 @@ import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.spyk
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -73,27 +70,6 @@ internal class StatsD4KClientTest {
             testObj.time(bucket, value, sampleRate, tags)
 
             coVerify { testObj.handleMessage(expectedMessage) }
-        }
-    }
-
-    @Test
-    fun timed() {
-        runBlocking {
-            val bucket = randString()
-            val sampleRate = randDouble()
-            val tags = randTags()
-            val testObj: StatsD4KClient = spyk(buildTestObj())
-            coEvery { testObj.time(any(), any(), any(), any()) } returns Unit
-
-            val t = testObj.timed(bucket, sampleRate, tags) {
-                delay(20)
-                "foo"
-            }
-
-            assertThat(t).isEqualTo("foo")
-
-            coVerify { testObj.time(bucket, any(), sampleRate, tags) }
-
         }
     }
 
@@ -209,7 +185,6 @@ internal class StatsD4KClientTest {
             coVerify { exceptionHandlerMock.invoke(exception) }
         }
     }
-
 
     private fun buildTestObj(
         globalTags: Map<String, String?> = emptyMap()

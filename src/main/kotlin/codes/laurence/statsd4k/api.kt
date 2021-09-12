@@ -16,13 +16,6 @@ interface StatsD4K {
         tags: Map<String, String?> = emptyMap(),
     )
 
-    suspend fun <T> timed(
-        bucket: String,
-        sampleRate: Double = 1.0,
-        tags: Map<String, String?> = emptyMap(),
-        block: suspend () -> T
-    ): T
-
     suspend fun gauge(
         bucket: String,
         value: Double,
