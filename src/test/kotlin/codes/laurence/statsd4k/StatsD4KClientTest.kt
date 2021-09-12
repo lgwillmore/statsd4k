@@ -1,5 +1,7 @@
 package codes.laurence.statsd4k
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import codes.laurence.statsd4k.message.Message
 import codes.laurence.statsd4k.sample.Sampler
 import codes.laurence.statsd4k.send.StatsDSender
@@ -9,6 +11,7 @@ import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.spyk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -74,19 +77,39 @@ internal class StatsD4KClientTest {
     }
 
     @Test
+    fun timed() {
+        runBlocking {
+            val bucket = randString()
+            val sampleRate = randDouble()
+            val tags = randTags()
+            val testObj: StatsD4KClient = spyk(buildTestObj())
+            coEvery { testObj.time(any(), any(), any(), any()) } returns Unit
+
+            val t = testObj.timed(bucket, sampleRate, tags) {
+                delay(20)
+                "foo"
+            }
+
+            assertThat(t).isEqualTo("foo")
+
+            coVerify { testObj.time(bucket, any(), sampleRate, tags) }
+
+        }
+    }
+
+    @Test
     fun gauge() {
         runBlocking {
             val value = randDouble()
             val expectedMessage = Message.Gauge(
                 bucket = bucket,
                 value = value,
-                sampleRate = sampleRate,
                 tags = tags
             )
             val testObj: StatsD4KClient = spyk(buildTestObj())
             coEvery { testObj.handleMessage(expectedMessage) } returns Unit
 
-            testObj.gauge(bucket, value, sampleRate, tags)
+            testObj.gauge(bucket, value, tags)
 
             coVerify { testObj.handleMessage(expectedMessage) }
         }
@@ -96,11 +119,10 @@ internal class StatsD4KClientTest {
     fun handleMessage() {
         runBlocking {
             val message = randMessage()
-            val sampledMessage = randMessage()
             val testObj = buildTestObj()
 
-            coEvery { samplerMock.sample(message) } returns sampledMessage
-            coEvery { serializerMock.invoke(sampledMessage) } returns serialized
+            coEvery { samplerMock.invoke(message.sampleRate) } returns true
+            coEvery { serializerMock.invoke(message) } returns serialized
             coEvery { senderMock.send(serialized) } returns Unit
 
             testObj.handleMessage(message)
@@ -110,12 +132,38 @@ internal class StatsD4KClientTest {
     }
 
     @Test
+    fun `handleMessage - global tags`() {
+        runBlocking {
+            val globalTags = randTags()
+            val testObj = buildTestObj(globalTags = globalTags)
+            All_MESSAGE_TYPES.forEach { message ->
+                val expectedGlobalTagMessage = when (message) {
+                    is Message.Count -> message.copy(tags = message.tags + globalTags)
+                    is Message.Gauge -> message.copy(tags = message.tags + globalTags)
+                    is Message.Time -> message.copy(tags = message.tags + globalTags)
+                }
+
+                coEvery { samplerMock.invoke(expectedGlobalTagMessage.sampleRate) } returns true
+                coEvery { serializerMock.invoke(expectedGlobalTagMessage) } returns serialized
+                coEvery { senderMock.send(serialized) } returns Unit
+
+
+
+                testObj.handleMessage(message)
+
+                coVerify { senderMock.send(serialized) }
+            }
+
+        }
+    }
+
+    @Test
     fun `handleMessage - not sampled`() {
         runBlocking {
             val message = randMessage()
             val testObj = buildTestObj()
 
-            coEvery { samplerMock.sample(message) } returns null
+            coEvery { samplerMock.invoke(message.sampleRate) } returns false
             coEvery { serializerMock.invoke(any()) } returns serialized
             coEvery { senderMock.send(serialized) } returns Unit
 
@@ -129,12 +177,11 @@ internal class StatsD4KClientTest {
     fun `handleMessage - error`() {
         runBlocking {
             val message = randMessage()
-            val sampledMessage = randMessage()
             val testObj = buildTestObj()
             val exception = IOException()
 
-            coEvery { samplerMock.sample(message) } throws exception
-            coEvery { serializerMock.invoke(sampledMessage) } returns serialized
+            coEvery { samplerMock.invoke(message.sampleRate) } throws exception
+            coEvery { serializerMock.invoke(message) } returns serialized
             coEvery { senderMock.send(serialized) } returns Unit
 
             testObj.handleMessage(message)
@@ -146,14 +193,12 @@ internal class StatsD4KClientTest {
 
 
     private fun buildTestObj(
-        globalSampleRate: Double? = null,
         globalTags: Map<String, String?> = emptyMap()
     ): StatsD4KClient {
         return StatsD4KClient(
             serialize = serializerMock,
             sender = senderMock,
             sampler = samplerMock,
-            globalSampleRate = globalSampleRate,
             globalTags = globalTags,
             exceptionHandler = exceptionHandlerMock
         )

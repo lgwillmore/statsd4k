@@ -1,9 +1,6 @@
 package codes.laurence.statsd4k.sample
 
-import codes.laurence.statsd4k.message.Message
+import io.ktor.util.date.*
+import kotlin.random.Random
 
-interface Sampler {
-
-    fun <V> sample(message: Message<V>): Message<V>?
-
-}
+typealias Sampler = (sampleRate: Double) -> Boolean
