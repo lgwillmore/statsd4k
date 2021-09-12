@@ -32,14 +32,6 @@ dependencies {
 }
 
 tasks {
-
-    val build by existing
-
-    artifactoryPublish {
-        dependsOn(build)
-        dependsOn("publishJvmPublicationToMavenLocal")
-    }
-
     test {
         useJUnitPlatform()
     }
