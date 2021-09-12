@@ -5,13 +5,14 @@ import codes.laurence.statsd4k.sample.DEFAULT_SAMPLER
 import codes.laurence.statsd4k.sample.Sampler
 import codes.laurence.statsd4k.send.StatsDSender
 import codes.laurence.statsd4k.serialize.StatsDSerializer
+import codes.laurence.statsd4k.serialize.StatsDSerializerBase
 import io.ktor.util.date.*
 
 typealias ExceptionHandler = (exception: Exception) -> Unit
 
 class StatsD4KClient(
-    private val serialize: StatsDSerializer,
     private val sender: StatsDSender,
+    private val serialize: StatsDSerializer = StatsDSerializerBase,
     private val globalTags: Map<String, String?> = emptyMap(),
     private val exceptionHandler: ExceptionHandler = {},
     private val sampler: Sampler = DEFAULT_SAMPLER,
