@@ -1,8 +1,6 @@
 package codes.laurence.statsd4k.integration
 
-import codes.laurence.statsd4k.StatsD4KClient
-import codes.laurence.statsd4k.send.StatsDSenderUDP
-import codes.laurence.statsd4k.serialize.StatsDSerializerNewRelic
+import codes.laurence.statsd4k.statsD4K
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -18,12 +16,19 @@ class NewRelicTest {
     @Test
     fun sendCountMetric() {
         runBlocking {
-            val client = StatsD4KClient(
-                serialize = StatsDSerializerNewRelic,
-                sender = StatsDSenderUDP("localhost", 8125)
+            val myStatsD4K = statsD4K {
+                newRelic()
+                udp()
+            }
+            myStatsD4K.count(
+                bucket = "test.metric",
+                value = 1,
+                sampleRate = 0.5,
+                tags = mapOf(
+                    "simple" to null,
+                    "key" to "value"
+                )
             )
-
-            client.count("test", 1)
         }
     }
 }

@@ -7,8 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import java.net.InetSocketAddress
 
 class StatsDSenderUDP(
-    host: String,
-    port: Int
+    host: String = "127.0.0.1",
+    port: Int = 8125
 ) : StatsDSender {
     private val out: ByteWriteChannel
 
