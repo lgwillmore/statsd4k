@@ -43,5 +43,4 @@ class DefaultSamplerTest {
         }
         assertThat(count.toDouble() / samples.toDouble()).isBetween(expectedMin, expectedMax)
     }
-
 }

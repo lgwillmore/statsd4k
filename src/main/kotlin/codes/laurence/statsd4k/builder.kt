@@ -26,7 +26,6 @@ class StatsDBuilderContext() {
     }
 }
 
-
 fun statsD4K(buildBlock: StatsDBuilderContext.() -> Unit): StatsD4K {
     val context = StatsDBuilderContext()
     context.buildBlock()

@@ -38,7 +38,6 @@ internal class StatsDSenderUDPTest {
             }.join()
 
             assertThat(received).containsOnly(*messages.toTypedArray())
-
         }
     }
 

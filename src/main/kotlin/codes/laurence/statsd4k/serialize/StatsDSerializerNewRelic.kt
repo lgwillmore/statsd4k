@@ -1,6 +1,5 @@
 package codes.laurence.statsd4k.serialize
 
-
 /**
  * A Serializer for handling New Relic style tags.
  *

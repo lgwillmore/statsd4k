@@ -34,7 +34,6 @@ internal class StatsD4KClientTest {
     @MockK(relaxed = true)
     private lateinit var exceptionHandlerMock: ExceptionHandler
 
-
     @Test
     fun count() {
         runBlocking {
@@ -142,13 +141,10 @@ internal class StatsD4KClientTest {
                 coEvery { serializerMock.invoke(expectedGlobalTagMessage) } returns serialized
                 coEvery { senderMock.send(serialized) } returns Unit
 
-
-
                 testObj.handleMessage(message)
 
                 coVerify { senderMock.send(serialized) }
             }
-
         }
     }
 

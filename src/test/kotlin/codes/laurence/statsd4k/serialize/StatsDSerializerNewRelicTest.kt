@@ -36,5 +36,4 @@ class StatsDSerializerNewRelicTest {
         val expected = "${StatsDSerializerBase(message)}$expectedTagSection"
         assertThat(testObj(message)).isEqualTo(expected)
     }
-
 }
