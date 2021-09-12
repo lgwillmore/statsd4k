@@ -24,6 +24,7 @@ inline fun <reified T : Message<*>> randMessageTyped(): T {
         Message.Time::class == T::class -> Message.Time(randString(), randLong(), randDouble(), randTags())
         Message.Count::class == T::class -> Message.Count(randString(), randInt(), randDouble(), randTags())
         Message.Gauge::class == T::class -> Message.Gauge(randString(), randDouble(), randTags())
+        Message.Set::class == T::class -> Message.Set(randString(), randString(), randTags())
         else -> {
             TODO("${T::class} not implemented")
         }
@@ -34,6 +35,7 @@ val All_MESSAGE_TYPES = listOf(
     randMessageTyped<Message.Count>(),
     randMessageTyped<Message.Time>(),
     randMessageTyped<Message.Gauge>(),
+    randMessageTyped<Message.Set>(),
 )
 
 fun randMessage(): Message<*> {

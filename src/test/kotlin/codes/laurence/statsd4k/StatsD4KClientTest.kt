@@ -116,6 +116,24 @@ internal class StatsD4KClientTest {
     }
 
     @Test
+    fun set() {
+        runBlocking {
+            val value = randString()
+            val expectedMessage = Message.Set(
+                bucket = bucket,
+                value = value,
+                tags = tags
+            )
+            val testObj: StatsD4KClient = spyk(buildTestObj())
+            coEvery { testObj.handleMessage(expectedMessage) } returns Unit
+
+            testObj.set(bucket, value, tags)
+
+            coVerify { testObj.handleMessage(expectedMessage) }
+        }
+    }
+
+    @Test
     fun handleMessage() {
         runBlocking {
             val message = randMessage()
@@ -141,6 +159,7 @@ internal class StatsD4KClientTest {
                     is Message.Count -> message.copy(tags = message.tags + globalTags)
                     is Message.Gauge -> message.copy(tags = message.tags + globalTags)
                     is Message.Time -> message.copy(tags = message.tags + globalTags)
+                    is Message.Set -> message.copy(tags = message.tags + globalTags)
                 }
 
                 coEvery { samplerMock.invoke(expectedGlobalTagMessage.sampleRate) } returns true

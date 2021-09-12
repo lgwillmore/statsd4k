@@ -28,4 +28,10 @@ interface StatsD4K {
         value: Double,
         tags: Map<String, String?> = emptyMap(),
     )
+
+    suspend fun set(
+        bucket: String,
+        value: String,
+        tags: Map<String, String?> = emptyMap(),
+    )
 }

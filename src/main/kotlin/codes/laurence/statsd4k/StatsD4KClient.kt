@@ -13,8 +13,8 @@ class StatsD4KClient(
     private val serialize: StatsDSerializer,
     private val sender: StatsDSender,
     private val globalTags: Map<String, String?> = emptyMap(),
+    private val exceptionHandler: ExceptionHandler = {},
     private val sampler: Sampler = DEFAULT_SAMPLER,
-    private val exceptionHandler: ExceptionHandler = {}
 ) : StatsD4K {
 
     override suspend fun count(bucket: String, value: Int, sampleRate: Double, tags: Map<String, String?>) {
@@ -59,6 +59,15 @@ class StatsD4KClient(
         handleMessage(message)
     }
 
+    override suspend fun set(bucket: String, value: String, tags: Map<String, String?>) {
+        val message = Message.Set(
+            bucket = bucket,
+            value = value,
+            tags = tags
+        )
+        handleMessage(message)
+    }
+
     internal suspend fun <V> handleMessage(message: Message<V>) {
         try {
             val globalMessage = when (message) {
@@ -69,6 +78,9 @@ class StatsD4KClient(
                     tags = globalTags + message.tags
                 )
                 is Message.Gauge -> message.copy(
+                    tags = globalTags + message.tags
+                )
+                is Message.Set -> message.copy(
                     tags = globalTags + message.tags
                 )
             }

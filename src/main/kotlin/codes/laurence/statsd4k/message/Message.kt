@@ -16,6 +16,15 @@ sealed class Message<Value> {
         override val type = "c"
     }
 
+    data class Time(
+        override val bucket: String,
+        override val value: Long,
+        override val sampleRate: Double,
+        override val tags: Map<String, String?>,
+    ) : Message<Long>() {
+        override val type = "ms"
+    }
+
     data class Gauge(
         override val bucket: String,
         override val value: Double,
@@ -25,12 +34,12 @@ sealed class Message<Value> {
         override val sampleRate = 1.0
     }
 
-    data class Time(
+    data class Set(
         override val bucket: String,
-        override val value: Long,
-        override val sampleRate: Double,
+        override val value: String,
         override val tags: Map<String, String?>,
-    ) : Message<Long>() {
-        override val type = "ms"
+    ) : Message<String>() {
+        override val type = "s"
+        override val sampleRate = 1.0
     }
 }
