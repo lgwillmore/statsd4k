@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+
+  new-relic-statsd:
+    image: "newrelic/nri-statsd:2.0.0"
+    ports:
+      - "8125:8125/udp"
+    hostname: "test-local"
+    environment:
+      - NR_EU_REGION=true
+      - NR_ACCOUNT_ID=$NR_ACCOUNT_ID
+      - NR_API_KEY=$NR_API_KEY

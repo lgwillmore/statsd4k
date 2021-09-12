@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.5.30"
+    id("com.palantir.docker-compose") version "0.28.0"
 }
 
 group = "codes.laurence.statsd4k"
@@ -28,4 +29,8 @@ tasks {
     test {
         useJUnitPlatform()
     }
+}
+
+dockerCompose {
+    setDockerComposeFile("$rootDir/docker-compose.yml")
 }
