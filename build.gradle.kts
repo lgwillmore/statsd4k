@@ -75,15 +75,21 @@ publishing {
 
 artifactory {
     setContextUrl("https://plurex.jfrog.io/artifactory")
-    publish(delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig> {
-        repository(delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper> {
-            setProperty("repoKey", "codes.laurence.statsd4k")
-            setProperty("username", System.getenv("JFROG_USER"))
-            setProperty("password", System.getenv("JFROG_PASSWORD"))
-            setProperty("maven", true)
-        })
-        defaults(delegateClosureOf<org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask> {
-            publications("statsd4k")
-        })
-    })
+    publish(
+        delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig> {
+            repository(
+                delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper> {
+                    setProperty("repoKey", "codes.laurence.statsd4k")
+                    setProperty("username", System.getenv("JFROG_USER"))
+                    setProperty("password", System.getenv("JFROG_PASSWORD"))
+                    setProperty("maven", true)
+                }
+            )
+            defaults(
+                delegateClosureOf<org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask> {
+                    publications("statsd4k")
+                }
+            )
+        }
+    )
 }
