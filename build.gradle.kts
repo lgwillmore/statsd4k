@@ -54,13 +54,12 @@ val sourcesJar by tasks.creating(Jar::class) {
 
 publishing {
     publications {
-        create<MavenPublication>("statsd4k") {
+        create<MavenPublication>("statsd4kMaven") {
             groupId = "codes.laurence.statsd4k"
             artifactId = "statsd4k"
             version = version
-
-            artifact(sourcesJar)
             from(components["java"])
+            artifact(sourcesJar)
         }
     }
 }
@@ -79,7 +78,7 @@ artifactory {
             )
             defaults(
                 delegateClosureOf<org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask> {
-                    publications("statsd4k")
+                    publications("statsd4kMaven")
                 }
             )
         }
