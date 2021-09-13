@@ -30,4 +30,34 @@ class StatsD4kExtensionsTest {
             coVerify { testObj.time(bucket, any(), sampleRate, tags) }
         }
     }
+
+    @Test
+    fun increment() {
+        runBlocking {
+            val bucket = randString()
+            val sampleRate = randDouble()
+            val tags = randTags()
+            val testObj: StatsD4K = mockk()
+            coEvery { testObj.count(any(), any(), any(), any()) } returns Unit
+
+            testObj.increment(bucket, sampleRate, tags)
+
+            coVerify { testObj.count(bucket, 1, sampleRate, tags) }
+        }
+    }
+
+    @Test
+    fun decrement() {
+        runBlocking {
+            val bucket = randString()
+            val sampleRate = randDouble()
+            val tags = randTags()
+            val testObj: StatsD4K = mockk()
+            coEvery { testObj.count(any(), any(), any(), any()) } returns Unit
+
+            testObj.decrement(bucket, sampleRate, tags)
+
+            coVerify { testObj.count(bucket, -1, sampleRate, tags) }
+        }
+    }
 }

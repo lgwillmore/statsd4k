@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.5.10"
     id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
     id("com.palantir.docker-compose") version "0.28.0"
     id("com.palantir.git-version") version "0.12.3"
-    id("maven-publish")
-    id("com.jfrog.artifactory") version "4.24.16"
+    `maven-publish`
+    id("com.jfrog.artifactory") version "4.21.0"
 }
 
 val gitVersion: groovy.lang.Closure<String> by extra
@@ -19,6 +19,7 @@ val assertKVersion: String by project
 
 repositories {
     mavenCentral()
+    maven(url = "https://jitpack.io")
 }
 
 dependencies {
