@@ -1,12 +1,14 @@
 package codes.laurence.statsd4k
 
+import codes.laurence.statsd4k.send.FailedSendHandler
 import codes.laurence.statsd4k.send.StatsDSender
 import codes.laurence.statsd4k.send.StatsDSenderUDP
 import codes.laurence.statsd4k.serialize.StatsDSerializer
 import codes.laurence.statsd4k.serialize.StatsDSerializerBase
 import codes.laurence.statsd4k.serialize.StatsDSerializerNewRelic
+import kotlinx.coroutines.CoroutineDispatcher
 
-class StatsDBuilderContext() {
+class StatsDBuilderContext {
     private var sender: StatsDSender = StatsDSenderUDP()
     private var serializer: StatsDSerializer = StatsDSerializerBase
 
@@ -14,8 +16,20 @@ class StatsDBuilderContext() {
         serializer = StatsDSerializerNewRelic
     }
 
-    fun udp(host: String = "127.0.0.1", port: Int = 8125) {
-        sender = StatsDSenderUDP(host, port)
+    fun udp(
+        host: String = StatsDSenderUDP.DEFAULT_HOST,
+        port: Int = StatsDSenderUDP.DEFAULT_PORT,
+        dispatcher: CoroutineDispatcher = StatsDSenderUDP.DEFAULT_DISPATCHER,
+        channelSize: Int = StatsDSenderUDP.DEFAULT_CHANNEL_SIZE,
+        failedSendHandler: FailedSendHandler = { _, _ -> }
+    ) {
+        sender = StatsDSenderUDP(
+            host = host,
+            port = port,
+            dispatcher = dispatcher,
+            channelSize = channelSize,
+            failedSendHandler = failedSendHandler
+        )
     }
 
     internal fun build(): StatsD4K {

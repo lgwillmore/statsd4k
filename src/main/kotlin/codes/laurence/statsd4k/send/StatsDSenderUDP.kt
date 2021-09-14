@@ -2,32 +2,40 @@ package codes.laurence.statsd4k.send
 
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
+import io.ktor.utils.io.core.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.net.InetSocketAddress
+import kotlin.text.toByteArray
 
 /**
- * Used to detect that channel is full and messages are being dropped.
+ * Used to detect messages are being dropped at client side.
  */
-typealias FailedSendHandler = (message: String) -> Unit
+typealias FailedSendHandler = (message: String, exception: Exception?) -> Unit
 
 class StatsDSenderUDP(
-    host: String = "127.0.0.1",
-    port: Int = 8125,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    channelSize: Int = 5000,
-    private val failedSendHandler: FailedSendHandler = {}
+    host: String = DEFAULT_HOST,
+    port: Int = DEFAULT_PORT,
+    dispatcher: CoroutineDispatcher = DEFAULT_DISPATCHER,
+    channelSize: Int = DEFAULT_CHANNEL_SIZE,
+    private val failedSendHandler: FailedSendHandler = { _, _ -> }
 ) : StatsDSender {
+    companion object {
+        const val DEFAULT_HOST = "127.0.0.1"
+        const val DEFAULT_PORT = 8125
+        const val DEFAULT_CHANNEL_SIZE = 5000
+        val DEFAULT_DISPATCHER = Dispatchers.IO
+    }
+
+    private val address = InetSocketAddress(host, port)
     private val scope: CoroutineScope = CoroutineScope(dispatcher + Job())
-    private val out: ByteWriteChannel
+    private val connection: ConnectedDatagramSocket
     private val bufferChannel = Channel<String>(channelSize)
 
     init {
         require(channelSize >= 100) { "Please use a channel size >= 100 to avoid excessive message loss" }
         val builder = aSocket(ActorSelectorManager(Dispatchers.IO))
-        val connection = builder.udp().connect(InetSocketAddress(host, port))
-        out = connection.openWriteChannel(autoFlush = false)
+        connection = builder.udp().connect(address)
         runBlocking {
             startSender()
         }
@@ -37,8 +45,15 @@ class StatsDSenderUDP(
         with(scope) {
             launch {
                 for (message in bufferChannel) {
-                    out.writeFully(message.toByteArray())
-                    out.flush()
+                    try {
+                        val datagram = Datagram(
+                            packet = ByteReadPacket(array = message.toByteArray()),
+                            address = address
+                        )
+                        connection.outgoing.send(datagram)
+                    } catch (e: Exception) {
+                        failedSendHandler("Could not send datagram", e)
+                    }
                 }
             }
         }
@@ -47,7 +62,7 @@ class StatsDSenderUDP(
     override suspend fun send(message: String) {
         val result = bufferChannel.trySend(message)
         if (result.isFailure) {
-            failedSendHandler(message)
+            failedSendHandler("Buffer is full", null)
         }
     }
 }

@@ -1,9 +1,13 @@
 package codes.laurence.statsd4k.integration
 
 import codes.laurence.statsd4k.statsD4K
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.util.concurrent.Executors
 
 /**
  * This is used in conjunction with the New Relic docker server.
@@ -13,6 +17,8 @@ import org.junit.jupiter.api.Test
 @Disabled("integration test")
 class NewRelicTest {
 
+    private val dispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
+
     @Test
     fun sendCountMetric() {
         runBlocking {
@@ -20,15 +26,24 @@ class NewRelicTest {
                 newRelic()
                 udp()
             }
-            myStatsD4K.count(
-                bucket = "test.metric",
-                value = 1,
-                sampleRate = 0.5,
-                tags = mapOf(
-                    "simple" to null,
-                    "key" to "value"
-                )
-            )
+            List(5) {
+                launch(dispatcher) {
+                    repeat(2000) {
+                        myStatsD4K.count(
+                            bucket = "test.metric.bucket",
+                            value = 1,
+                            sampleRate = 1.0,
+                            tags = mapOf(
+                                "simple" to null,
+                                "key1" to "value1",
+                                "key2" to "value2",
+                                "key3" to "verylongvalue3yes",
+                                "key4" to "verylongvalue4yes",
+                            )
+                        )
+                    }
+                }
+            }.joinAll()
         }
     }
 }
