@@ -2,19 +2,21 @@ package codes.laurence.statsd4k.send
 
 import assertk.assertThat
 import assertk.assertions.containsOnly
+import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.junit.jupiter.api.Test
 import java.net.InetSocketAddress
+import java.util.concurrent.Executors
 
 internal class StatsDSenderUDPTest {
 
     private val host = "127.0.0.1"
     private val port = 2323
+    private val dispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 
     @Test
     fun send() {
@@ -22,22 +24,34 @@ internal class StatsDSenderUDPTest {
             val testObj = buildSender()
             val listener = buildListener()
 
-            val messages = List(10) { index -> "foo$index" }
-            messages.forEach {
-                launch {
-                    testObj.send(it)
+            var sentCount = 0
+            val messages = List(100) { index -> "foo$index" }
+            val notReceived = mutableSetOf<String>()
+            notReceived.addAll(messages)
+            val unexpectedMessages = mutableListOf<String>()
+
+            val receiver = launch {
+                var received = 0
+                while(received < messages.size) {
+                    withTimeout(2000){
+                        val message = listener.receive().packet.readUTF8Line()
+                        received++
+                        if (!notReceived.remove(message)) {
+                            unexpectedMessages.add(message!!)
+                        }
+                    }
                 }
             }
-
-            val received = mutableListOf<String?>()
-
-            launch {
-                repeat(messages.size) {
-                    received.add(listener.receive().packet.readUTF8Line())
+            messages.forEach {
+                launch(dispatcher) {
+                    testObj.send(it)
+                    sentCount++
                 }
-            }.join()
+            }
+            receiver.join()
 
-            assertThat(received).containsOnly(*messages.toTypedArray())
+            assertThat(unexpectedMessages).isEmpty()
+            assertThat(notReceived).isEmpty()
         }
     }
 
