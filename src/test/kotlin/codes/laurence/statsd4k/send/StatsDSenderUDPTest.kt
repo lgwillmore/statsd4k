@@ -1,9 +1,10 @@
 package codes.laurence.statsd4k.send
 
 import assertk.assertThat
-import assertk.assertions.containsOnly
 import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isSuccess
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
@@ -19,9 +20,21 @@ internal class StatsDSenderUDPTest {
     private val dispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
 
     @Test
+    fun `initialise with bad channel size`() {
+        assertThat { StatsDSenderUDP(channelSize = 0) }.isFailure().isInstanceOf(IllegalArgumentException::class)
+        assertThat { StatsDSenderUDP(channelSize = -1) }.isFailure().isInstanceOf(IllegalArgumentException::class)
+        assertThat { StatsDSenderUDP(channelSize = 99) }.isFailure().isInstanceOf(IllegalArgumentException::class)
+    }
+
+    @Test
+    fun `initialise - valid`() {
+        assertThat { StatsDSenderUDP(channelSize = 100) }.isSuccess()
+    }
+
+    @Test
     fun send() {
         runBlocking {
-            val testObj = buildSender()
+            val testObj = StatsDSenderUDP(host, port)
             val listener = buildListener()
 
             var sentCount = 0
@@ -32,8 +45,8 @@ internal class StatsDSenderUDPTest {
 
             val receiver = launch {
                 var received = 0
-                while(received < messages.size) {
-                    withTimeout(2000){
+                while (received < messages.size) {
+                    withTimeout(5000) {
                         val message = listener.receive().packet.readUTF8Line()
                         received++
                         if (!notReceived.remove(message)) {
@@ -54,8 +67,6 @@ internal class StatsDSenderUDPTest {
             assertThat(notReceived).isEmpty()
         }
     }
-
-    private fun buildSender(): StatsDSenderUDP = StatsDSenderUDP(host, port)
 
     private fun buildListener() =
         aSocket(ActorSelectorManager(Dispatchers.IO)).udp().bind(InetSocketAddress(host, port))
