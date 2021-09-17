@@ -21,6 +21,9 @@ repositories {
 
 dependencies {
     implementation("codes.laurence.statsd4k:statsd4k:1.0.0")
+    
+    // There is a dependency on ktor network for UDP. Use a version of your choosing, but tested with 1.6.3
+    implementation("io.ktor:ktor-network:$ktorVersion")
 }
 ```
 
