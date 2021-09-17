@@ -6,18 +6,11 @@ A StatsD client for kotlin. Built to be composable and allow for operation with 
 
 ## Composability
 
-The `StatsD4KClient` provides composable components for customization of:
-
-- Serialization with the `StatsDSerializer` interface.
-  - StatsDSerializerBase
-  - StatsDSerializerNewRelic
-- Sending with the `StatsDSender` interface.
-  - StatsDSenderUDP
+The `StatsD4KClient` provides composable components for customization of Serialization and Sending of messages.
 
 ## Tag Support
 The client interface also provides `Tag` parameters for use with backends such as `New Relic` and `Datadog` (as long as
 the serializers and senders are compatible)
-
 
 ## Gradle
 
@@ -27,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation("codes.laurence.statsd4k:statsd4k:0.0.1")
+    implementation("codes.laurence.statsd4k:statsd4k:1.0.0")
 }
 ```
 
@@ -50,5 +43,9 @@ myStatsD4K.count(
     )
 )
 ```
+
+## Null client
+
+There is a `StatsD4kNull` implementation to drop in for local or when your statsd is not live or needed yet.
 
 

@@ -10,8 +10,8 @@ import codes.laurence.statsd4k.serialize.StatsDSerializerBase
 typealias ExceptionHandler = (exception: Exception) -> Unit
 
 class StatsD4KClient(
-    private val sender: StatsDSender,
-    private val serialize: StatsDSerializer = StatsDSerializerBase,
+    internal val sender: StatsDSender,
+    internal val serialize: StatsDSerializer = StatsDSerializerBase,
     private val globalTags: Map<String, String?> = emptyMap(),
     private val exceptionHandler: ExceptionHandler = {},
     private val sampler: Sampler = DEFAULT_SAMPLER,

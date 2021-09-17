@@ -8,6 +8,24 @@ import codes.laurence.statsd4k.serialize.StatsDSerializerBase
 import codes.laurence.statsd4k.serialize.StatsDSerializerNewRelic
 import kotlinx.coroutines.CoroutineDispatcher
 
+class UDPBuilderContext {
+    var host: String = StatsDSenderUDP.DEFAULT_HOST
+    var port: Int = StatsDSenderUDP.DEFAULT_PORT
+    var dispatcher: CoroutineDispatcher = StatsDSenderUDP.DEFAULT_DISPATCHER
+    var channelSize: Int = StatsDSenderUDP.DEFAULT_CHANNEL_SIZE
+    var failedSendHandler: FailedSendHandler = { _, _ -> }
+
+    internal fun build(): StatsDSenderUDP {
+        return StatsDSenderUDP(
+            host = host,
+            port = port,
+            dispatcher = dispatcher,
+            channelSize = channelSize,
+            failedSendHandler = failedSendHandler
+        )
+    }
+}
+
 class StatsDBuilderContext {
     private var sender: StatsDSender = StatsDSenderUDP()
     private var serializer: StatsDSerializer = StatsDSerializerBase
@@ -17,19 +35,11 @@ class StatsDBuilderContext {
     }
 
     fun udp(
-        host: String = StatsDSenderUDP.DEFAULT_HOST,
-        port: Int = StatsDSenderUDP.DEFAULT_PORT,
-        dispatcher: CoroutineDispatcher = StatsDSenderUDP.DEFAULT_DISPATCHER,
-        channelSize: Int = StatsDSenderUDP.DEFAULT_CHANNEL_SIZE,
-        failedSendHandler: FailedSendHandler = { _, _ -> }
+        configureBlock: UDPBuilderContext.() -> Unit = {}
     ) {
-        sender = StatsDSenderUDP(
-            host = host,
-            port = port,
-            dispatcher = dispatcher,
-            channelSize = channelSize,
-            failedSendHandler = failedSendHandler
-        )
+        val context = UDPBuilderContext()
+        context.configureBlock()
+        sender = context.build()
     }
 
     internal fun build(): StatsD4K {
@@ -40,8 +50,8 @@ class StatsDBuilderContext {
     }
 }
 
-fun statsD4K(buildBlock: StatsDBuilderContext.() -> Unit): StatsD4K {
+fun statsD4K(configureBlock: StatsDBuilderContext.() -> Unit = {}): StatsD4K {
     val context = StatsDBuilderContext()
-    context.buildBlock()
+    context.configureBlock()
     return context.build()
 }

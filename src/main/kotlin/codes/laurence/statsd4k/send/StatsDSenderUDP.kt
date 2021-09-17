@@ -27,7 +27,7 @@ class StatsDSenderUDP(
         val DEFAULT_DISPATCHER = Dispatchers.IO
     }
 
-    private val address = InetSocketAddress(host, port)
+    internal val address = InetSocketAddress(host, port)
     private val scope: CoroutineScope = CoroutineScope(dispatcher + Job())
     private val connection: ConnectedDatagramSocket
     private val bufferChannel = Channel<String>(channelSize)
