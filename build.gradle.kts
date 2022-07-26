@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "1.5.10"
-    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
-    id("com.palantir.docker-compose") version "0.28.0"
+    kotlin("jvm") version "1.7.10"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    id("com.palantir.docker-compose") version "0.34.0"
     id("com.palantir.git-version") version "0.12.3"
     `maven-publish`
     id("com.jfrog.artifactory") version "4.21.0"
@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("io.ktor:ktor-network:$ktorVersion")
+    api("io.ktor:ktor-network:$ktorVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
