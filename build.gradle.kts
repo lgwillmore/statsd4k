@@ -4,7 +4,7 @@ plugins {
     id("com.palantir.docker-compose") version "0.34.0"
     id("com.palantir.git-version") version "0.12.3"
     `maven-publish`
-    id("com.jfrog.artifactory") version "4.21.0"
+    id("com.jfrog.artifactory") version "4.28.4"
 }
 
 val gitVersion: groovy.lang.Closure<String> by extra
@@ -66,7 +66,7 @@ publishing {
 }
 
 artifactory {
-    setContextUrl("https://plurex.jfrog.io/artifactory")
+    setContextUrl("https://laurencecodes.jfrog.io/artifactory")
     publish(
         delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig> {
             repository(
