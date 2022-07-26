@@ -10,7 +10,6 @@ import io.ktor.network.sockets.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.Test
-import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
 internal class StatsDSenderUDPTest {
