@@ -22,7 +22,7 @@ val signingKey: Provider<String> =
 val signingPassword: Provider<String> =
     providers.environmentVariable("SONATYPE_SIGNING_PASSWORD")
 val sonatypeUser: Provider<String> =
-    providers.environmentVariable("SONATYPE_USER")
+    providers.environmentVariable("SONATYPE_USERNAME")
 val sonatypePassword: Provider<String> =
     providers.environmentVariable("SONATYPE_PASSWORD")
 
@@ -77,6 +77,7 @@ afterEvaluate {
 publishing {
     repositories {
         if (listOf(sonatypeUser, sonatypePassword).all { it.isPresent }) {
+            println("Publishing to sonatype")
             maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 name = "sonatype"
                 credentials {
@@ -85,6 +86,7 @@ publishing {
                 }
             }
         } else {
+            println("Publishing to maven-internal")
             // publish to local dir, for testing
             maven(rootProject.layout.buildDirectory.dir("maven-internal")) {
                 name = "LocalProjectDir"
